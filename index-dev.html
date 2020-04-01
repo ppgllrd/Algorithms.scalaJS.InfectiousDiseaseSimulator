@@ -1,11 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simulator</title>
+  <title>Infectious Disease Simulator</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
-<body style="margin: 10px; font: arial; font-size: 10pt">
-<h1>Simulator</h1>
+<style>
+*     { font-size: 97%;
+        font-family: Verdana, Geneva, sans-serif;
+      }
+
+small { font-size: 55% }
+
+h1    { font-size: 125% }
+
+div#controls { background-color: whiteSmoke; padding: 10px; border: 1px solid gray }
+
+.Button { }
+
+.IntField { text-align:right; font-size: 95% }
+
+.Label { }
+
+.Slider { background-color: lightgray }
+
+.Slider_Display { font-size: 85%; width: 35px; padding:5%; border: solid 1px silver }
+
+</style>
+<body>
+<h1>Infectious Disease Simulator</h1>
 <table>
   <tr>
     <td>
@@ -17,7 +39,7 @@
     </td>
   </tr>
 </table>
-<small>@ José E. Gallardo, 2020. Partly based on Java Event-Driven Simulator by Robert Sedgewick and Kevin Wayne.</small>
+<small>@José E. Gallardo, 2020. Partly based on <a href="https://algs4.cs.princeton.edu/61event">Java Event-Driven Simulator by Robert Sedgewick and Kevin Wayne</a>.</small>
 <script type="text/javascript" src="./target/scala-2.13/infectiousdiseasesimulatorjs-fastopt.js"></script>
 </body>
 </html>

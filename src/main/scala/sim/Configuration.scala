@@ -21,9 +21,9 @@ case class Configuration(seed: Int
 
 object DefaultConfiguration extends Configuration(
   seed = 0
-  , Hz = 40
-  , populationSz = 800
-  , velocitySigma = 50
+  , Hz = 48
+  , populationSz = 400
+  , velocitySigma = 30
   , timeLimit = 1000
   , probInfection = 1.0 / 3
   , probDying = 0.1
@@ -31,14 +31,4 @@ object DefaultConfiguration extends Configuration(
   )
 
 
-object DefaultConfiguration2 extends Configuration(
-  seed = 0
-  , Hz = 48
-  , populationSz = 100
-  , velocitySigma = 25
-  , timeLimit = 1000
-  , probInfection = 1.0 / 3
-  , probDying = 0.1
-  , timeInfectious = 15
-)
 

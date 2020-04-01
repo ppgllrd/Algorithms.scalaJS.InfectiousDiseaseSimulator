@@ -22,6 +22,7 @@ object Main  {
     tooltip = seedTooltip
   }
   private val seedIntField = new IntField() {
+    columns = 12
     tooltip = seedTooltip
   }
 
@@ -145,7 +146,7 @@ object Main  {
   }
 
   private val table = dom.document.createElement("table")
-  table.appendChild(Layout.row(seedLabel.layout, Layout.horizontal(seedIntField.layout, randomButton.layout)))
+  table.appendChild(Layout.row(seedLabel.layout, Layout.horizontal()(seedIntField.layout, randomButton.layout)))
   table.appendChild(Layout.row(populationSzLabel.layout, populationSzSlider.layout))
   table.appendChild(Layout.row(velocityLabel.layout, velocitySlider.layout))
   table.appendChild(Layout.row(probInfectionLabel.layout, probInfectionSlider.layout))

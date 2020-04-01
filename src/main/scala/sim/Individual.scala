@@ -144,39 +144,6 @@ class Individual( private var rx: Double
     else
       Infinity
 
-
-  val wallX = -50
-  val wallYTop = -125
-  val wallYBottom = 125
-
-  def timeToHitVerticalWallll: Double =
-    if(vx > 0) {
-      if(rx > wallX)
-        Infinity
-      else {
-        val dx = wallX - rx - radius
-        val t = dx / vx
-        val y = ry + vy*t
-        if(y >= wallYTop && y <= wallYBottom)
-          t
-        else
-          Infinity
-      }
-    } else if(vx < 0) {
-      if(rx < wallX)
-        Infinity
-      else {
-        val dx = wallX - rx + radius
-        val t = dx / vx
-        val y = ry + vy*t
-        if(y >= wallYTop && y <= wallYBottom)
-          t
-        else
-          Infinity
-      }
-    } else
-      Infinity
-
   def bounceOff(that: Individual): Unit = {
     val dx = that.rx - this.rx
     val dy = that.ry - this.ry

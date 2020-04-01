@@ -59,9 +59,6 @@ class Simulator(window: Drawable, conf: Configuration) {
 
       val ty = time + ia.timeToHitHorizontalWall
       pq.enqueue(HorizontalWallCollision(ty, ia))
-
-      //val txx = time + ia.timeToHitVerticalWallll
-      //pq.enqueue(VerticalWallCollision(txx, ia))
     }
   }
 
@@ -86,7 +83,8 @@ class Simulator(window: Drawable, conf: Configuration) {
   private val left = BoundingBox.left.toInt+5
 
   private object history {
-    private val resolution = 3
+    // todo this can be improved
+    private val resolution = 2
     private val percentsInfected = Array.fill[Double]((resolution*conf.timeLimit).toInt)(0)
     private val percentsNonInfected = Array.fill[Double]((resolution*conf.timeLimit).toInt)(0)
     def update(time: Double, infected: Double, nonInfected: Double): Unit = {
@@ -95,10 +93,9 @@ class Simulator(window: Drawable, conf: Configuration) {
       percentsNonInfected(i) = nonInfected
     }
 
-    private val width = 2
-    private val scale = 0.85
+    private val width = 3
+    private val scale = 0.55
     def drawOn(g2D: Graphics2D): Unit = {
-      /*
       for(i <- 0 until (resolution*time).toInt) {
         val percentRecovered = 100 - percentsInfected(i) - percentsNonInfected(i)
         val xs = Array( (percentsInfected(i), Colors.infected)
@@ -106,13 +103,10 @@ class Simulator(window: Drawable, conf: Configuration) {
                       , (percentsNonInfected(i), Colors.nonInfected)
                       ).sortBy(-_._1)
         for((y, color) <- xs) {
-          g2D.setColor(color)
-          val rect = new Rectangle2D.Double(left + i*width-1, top - y*scale, width+2, y*scale)
-          g2D.fill(rect)
+          g2D.fillStyle = color
+          g2D.fillRect(left + i*width, top - y*scale, width+1, y*scale)
         }
       }
-
-       */
     }
   }
 
@@ -121,7 +115,6 @@ class Simulator(window: Drawable, conf: Configuration) {
     val percentInfected = 100.0 * infected / alive
     val percentNonInfected = 100.0 * nonInfected / alive
     history.update(time, percentInfected, percentNonInfected)
-
 
     g2D.font = Fonts.mono
     g2D.fillStyle = Colors.infected
@@ -136,41 +129,13 @@ class Simulator(window: Drawable, conf: Configuration) {
     g2D.fillStyle = Colors.black
     g2D.fillText(f"Time: $time%.2f", left+700, bottom)
 
-
-    /*
-    g2D.setFont(Fonts.mono)
-    g2D.setColor(Colors.infected)
-    g2D.drawString(f"Infected: $infected%3d($percentInfected%6.2f%%)", left, bottom)
-    g2D.setColor(Colors.dead)
-    g2D.drawString(f"Dead: $dead%4d", left+225, bottom)
-    g2D.setColor(Colors.nonInfected)
-    g2D.drawString(f"Non-infected: $nonInfected%3d($percentNonInfected%6.2f%%)", left+350, bottom)
-    g2D.setColor(Color.black)
-    g2D.drawString(f"Time: $time%.2f", left+700, bottom)
-    if(false && time.toInt % 2 == 0)
-    history.drawOn(g2D)
-
-*/
     BoundingBox.drawOn(g2D)
 
     for(i <- individuals)
       i.drawOn(g2D)
 
-      /*
-      {
-        val wallX = -50
-        val wallYTop = -125
-        val wallYBottom = 125
-        g2D.setColor(Color.magenta)
-        g2D.setStroke(new BasicStroke(3))
-        g2D.drawLine(wallX, wallYTop, wallX, wallYBottom)
-      }
-*/
+    history.drawOn(g2D)
   }
-
-  /**
-   * Simulates the system of particles for the specified amount of time.
-   */
 
   def infect(i: Individual): Unit = {
     i.infect()

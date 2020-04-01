@@ -26,12 +26,12 @@ object Window {
 class Window(canvas: html.Canvas) extends Drawable {
   private val g2D = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  private val scale = 0.75
+  private val scale = 0.7
 
   private val width = dom.window.innerWidth
   private val height = dom.window.innerHeight
 
-  canvas.width = (BoundingBox.width*scale*1.1).toInt
+  canvas.width = (BoundingBox.width*scale*1.05).toInt
   canvas.height = (BoundingBox.height*scale*1.4).toInt
 
   private val xOffset = canvas.width / 2.0
@@ -58,26 +58,32 @@ object Fonts {
   val mono = "14px Mono"
 }
 
+object Identifier {
+  private var id = 0
+  def unique(prefix: String): String = {
+    id += 1
+    s"$prefix$id"
+  }
+}
+
 object Layout {
-  def horizontal(left: Element, right: Element): Element = {
+  def horizontal(minWidth: Int = 0, padding: Int = 1)(elements: Element*): Element = {
     val div = dom.document.createElement("div")
     div.setAttribute("style", "display:table;")
-    val outputDiv = dom.document.createElement("div")
-    outputDiv.appendChild(left)
-    outputDiv.setAttribute("style", "display:table-cell; vertical-align:middle; width: 50px; text-align:right")
-    val sliderDiv = dom.document.createElement("div")
-    sliderDiv.appendChild(right)
-    sliderDiv.setAttribute("style", "display:table-cell; vertical-align:middle; padding-left: 5px")
-    div.appendChild(outputDiv)
-    div.appendChild(sliderDiv)
+    for(element <- elements){
+      val innerDiv = dom.document.createElement("div")
+      innerDiv.appendChild(element)
+      innerDiv.setAttribute("style", s"display:table-cell; vertical-align:middle; padding-left: ${padding}px; min-width: ${minWidth}px; text-align:right")
+      div.appendChild(innerDiv)
+    }
     div
   }
 
-  def row(xs: Element*): Element = {
+  def row(elements: Element*): Element = {
     val row = dom.document.createElement("tr")
-    for(x <- xs) {
+    for(element <- elements) {
       val cell = dom.document.createElement("td")
-      cell.appendChild(x)
+      cell.appendChild(element)
       row.appendChild(cell)
     }
     row
@@ -91,11 +97,11 @@ trait CanDisable {
 
 class Label(s: String) {
   protected val output = dom.document.createElement("output").asInstanceOf[HTMLInputElement]
+  output.setAttribute("class", "Label")
 
   def tooltip: String = output.title
-  def tooltip_=(s: String): Unit = {
+  def tooltip_=(s: String): Unit =
     output.title = s
-  }
 
   output.innerText = s
   val layout = output
@@ -103,46 +109,46 @@ class Label(s: String) {
 
 class IntField() extends CanDisable {
   protected val input = dom.document.createElement("input").asInstanceOf[HTMLInputElement]
-  protected val peers = Array(input)
 
   input.setAttribute("type", "number")
-  input.setAttribute("size", "12")
-  input.setAttribute("style", "text-align:right; font-size: 9pt")
+  input.setAttribute("class", "IntField")
   val layout = input
 
-  def value: Int = input.value.toInt
-  def value_=(v: Int): Unit = {
-    input.value = v.toString
+  def columns: Int = input.getAttribute("size").toInt
+  def columns_=(v: Int): Unit = {
+    input.setAttribute("size", v.toString)
+    input.setAttribute("min", "0")
+    input.setAttribute("max", math.pow(10,v).toInt.toString)
   }
+
+  def value: Int = input.value.toInt
+  def value_=(v: Int): Unit =
+    input.value = v.toString
 
   def tooltip: String = input.title
-  def tooltip_=(s: String): Unit = {
+  def tooltip_=(s: String): Unit =
     input.title = s
-  }
 
   def disabled: Boolean = input.disabled
-  def disabled_=(d: Boolean): Unit = {
+  def disabled_=(d: Boolean): Unit =
     input.disabled = d
-  }
 }
 
 class Button(s: String) extends CanDisable {
   protected val button = dom.document.createElement("button").asInstanceOf[html.Button]
+  button.setAttribute("class", "Button")
 
   def title: String = button.title
-  def title_=(s: String): Unit = {
+  def title_=(s: String): Unit =
     button.title = s
-  }
 
   def text: String = button.innerText
-  def text_=(s: String): Unit = {
+  def text_=(s: String): Unit =
     button.innerText = s
-  }
 
   def disabled: Boolean = button.disabled
-  def disabled_=(d: Boolean): Unit = {
+  def disabled_=(d: Boolean): Unit =
     button.disabled = d
-  }
 
   text_=(s)
   val layout = button
@@ -151,41 +157,55 @@ class Button(s: String) extends CanDisable {
   button.onclick = onClick(_)
 }
 
-
 abstract class NumericSlider[A] extends CanDisable {
   protected def formatText(n: A): String
-
   protected def fromInt(n: Int): A
-
   protected def toInt(v: A): Int
 
-  protected val output = dom.document.createElement("output").asInstanceOf[HTMLInputElement]
+  protected val display = dom.document.createElement("div").asInstanceOf[html.Div]
   protected val slider = dom.document.createElement("input").asInstanceOf[HTMLInputElement]
 
   def value: A = fromInt(slider.value.toInt)
   def value_=(v: A): Unit = {
-    output.value = formatText(v)
+    display.innerText = formatText(v)
     slider.value = toInt(v).toString
   }
 
   slider.setAttribute("type", "range")
   slider.setAttribute("step", "1")
-  slider.addEventListener("input", (_: Any) => output.value = formatText(value))
+  slider.setAttribute("class", "Slider")
+  slider.addEventListener("input", (_: Any) => display.innerText = formatText(value))
 
-  output.setAttribute("style", "font-size: 9pt")
+  display.setAttribute("class", "Slider_Display")
 
-  val layout = Layout.horizontal(output, slider)
+  val layout = Layout.horizontal(minWidth = 40)(display, slider)
 
   def tooltip: String = slider.title
   def tooltip_=(s: String): Unit = {
-    output.title = s
+    display.title = s
     slider.title = s
   }
 
   def disabled: Boolean = slider.disabled
-  def disabled_=(d: Boolean): Unit = {
-    output.disabled = d
+  def disabled_=(d: Boolean): Unit =
     slider.disabled = d
+
+  protected def setRange(min: Int, max: Int, ticks: Int = 20):Unit = {
+    slider.setAttribute("min", min.toString)
+    slider.setAttribute("max", max.toString)
+    val majorTickSpacing = (max - min + 1) / ticks
+
+    val labels = List.range(min, max+1, majorTickSpacing)
+    val datalist = dom.document.createElement("datalist")
+    val id = Identifier.unique("datalist")
+    datalist.setAttribute("id", id)
+    for(l <- labels) {
+      val option = dom.document.createElement("option")
+      option.setAttribute("value", l.toString)
+      datalist.appendChild(option)
+    }
+    dom.document.getElementById("controls").appendChild(datalist)
+    slider.setAttribute("list", id)
   }
 }
 
@@ -197,9 +217,7 @@ class DoubleSlider(v: Double, from: Int, to: Int) extends NumericSlider[Double] 
   def fromInt(n: Int): Double = n
   def toInt(v: Double): Int = v.toInt
 
-  slider.setAttribute("min", from.toString)
-  slider.setAttribute("max", to.toString)
-
+  setRange(from, to)
   value = v
 }
 
@@ -217,9 +235,7 @@ class IntSlider(v: Int, from: Int, to: Int) extends NumericSlider[Int] {
   def fromInt(n: Int): Int = n
   def toInt(v: Int): Int = v
 
-  slider.setAttribute("min", from.toString)
-  slider.setAttribute("max", to.toString)
-
+  setRange(from, to)
   value = v
 }
 
