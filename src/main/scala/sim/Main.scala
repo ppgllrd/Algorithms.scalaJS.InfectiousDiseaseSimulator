@@ -126,8 +126,8 @@ object Main  {
     override def onClick (ev: MouseEvent): Unit = {
       handleOpt match {
         case None =>
-          val conf = DefaultConfiguration
-          val simulator = Simulator(window, configuration)
+          val conf = configuration
+          val simulator = Simulator(window, conf)
           simulator.initialize()
           val handle = dom.window.setInterval(() => simulator.step(), 1000.0/conf.Hz)
 
